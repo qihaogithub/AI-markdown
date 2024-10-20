@@ -1,0 +1,8 @@
+创建虚拟环境
+venv\Scripts\activate
+
+激活虚拟环境 
+.\venv\Scripts\python
+
+安装必需的模块
+pip install -r requirements.txt
