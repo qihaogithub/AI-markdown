@@ -16,7 +16,9 @@ max_length = 1800
 # 设置翻译的路径
 dir_to_translate = "testdir/to-translate"
 dir_translated = {
-    "zh": "testdir/docs/zh"  # 只保留中文路径
+    "en": "testdir/docs/en",
+    "es": "testdir/docs/es",
+    "ar": "testdir/docs/ar"
 }
 
 # 不进行翻译的文件列表
@@ -26,7 +28,9 @@ processed_list = "processed_list.txt"
 
 # 由 ChatGPT 翻译的提示
 tips_translated_by_chatgpt = {
-    "zh": "\n\n> 本文是使用 ChatGPT 翻译的，如有遗漏请[**反馈**](https://github.com/linyuxuanlin/Wiki_MkDocs/issues/new)。"
+    "en": "\n\n> This post is translated using ChatGPT, please [**feedback**](https://github.com/linyuxuanlin/Wiki_MkDocs/issues/new) if any omissions.",
+    "es": "\n\n> Este post está traducido usando ChatGPT, por favor [**feedback**](https://github.com/linyuxuanlin/Wiki_MkDocs/issues/new) si hay alguna omisión.",
+    "ar": "\n\n> تمت ترجمة هذه المشاركة باستخدام ChatGPT، يرجى [**تزويدنا بتعليقاتكم**](https://github.com/linyuxuanlin/Wiki_MkDocs/issues/new) إذا كانت هناك أي حذف أو إهمال."
 }
 
 # 文章使用英文撰写的提示，避免本身为英文的文章被重复翻译为英文
@@ -37,8 +41,8 @@ marker_force_translate = "\n[translate]\n"
 # Front Matter 处理规则
 front_matter_translation_rules = {
     # 调用 ChatGPT 自动翻译
-    "title": lambda value, lang: translate_text(value, lang, "front-matter"),
-    "description": lambda value, lang: translate_text(value, lang, "front-matter"),
+    "title": lambda value, lang: translate_text(value, lang,"front-matter"),
+    "description": lambda value, lang: translate_text(value, lang,"front-matter"),
     
     # 使用固定的替换规则
     "categories": lambda value, lang: front_matter_replace(value, lang),
@@ -53,23 +57,36 @@ replace_rules = [
         # 版权信息手动翻译
         "orginal_text": "> 原文地址：<https://wiki-power.com/>",
         "replaced_text": {
-            "zh": "> 原文地址：<https://wiki-power.com/>"  # 保持原文不变
+            "en": "> Original: <https://wiki-power.com/>",
+            "es": "> Dirección original del artículo: <https://wiki-power.com/>",
+            "ar": "> عنوان النص: <https://wiki-power.com/>",
         }
     },
     {
         # 版权信息手动翻译
         "orginal_text": "> 本篇文章受 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by/4.0/deed.zh) 协议保护，转载请注明出处。",
         "replaced_text": {
-            "zh": "> 本篇文章受 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by/4.0/deed.zh) 协议保护，转载请注明出处。"  # 保持原文不变
+            "en": "> This post is protected by [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by/4.0/deed.en) agreement, should be reproduced with attribution.",
+            "es": "> Este artículo está protegido por la licencia [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by/4.0/deed.zh). Si desea reproducirlo, por favor indique la fuente.",
+            "ar": "> يتم حماية هذا المقال بموجب اتفاقية [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by/4.0/deed.zh)، يُرجى ذكر المصدر عند إعادة النشر.",
         }
     },
     {
         # 文章中的站内链接，跳转为当前相同语言的网页
         "orginal_text": "](https://wiki-power.com/",
         "replaced_text": {
-            "zh": "](https://wiki-power.com/zh/"  # 添加中文链接
+            "en": "](https://wiki-power.com/en/",
+            "es": "](https://wiki-power.com/es/",
+            "ar": "](https://wiki-power.com/ar/",
         }
     }
+    # {
+    #    # 不同语言可使用不同图床
+    #    "orginal_text": "![](https://wiki-media-1253965369.cos.ap-guangzhou.myqcloud.com/",
+    #    "replaced_en": "![](https://f004.backblazeb2.com/file/wiki-media/",
+    #    "replaced_es": "![](https://f004.backblazeb2.com/file/wiki-media/",
+    #    "replaced_ar": "![](https://f004.backblazeb2.com/file/wiki-media/",
+    # },
 ]
 
 # Front Matter 固定字段替换规则。
@@ -77,36 +94,63 @@ front_matter_replace_rules = [
     {
         "orginal_text": "类别 1",
         "replaced_text": {
-            "zh": "类别 1",
+            "en": "Categories 1",
+            "es": "Categorías 1",
+            "ar": "الفئة 1",
         }
     },
     {
         "orginal_text": "类别 2",
         "replaced_text": {
-            "zh": "类别 2",
+            "en": "Categories 2",
+            "es": "Categorías 2",
+            "ar": "الفئة 2",
         }
     },
     {
         "orginal_text": "标签 1",
         "replaced_text": {
-            "zh": "标签 1",
+            "en": "Tags 1",
+            "es": "Etiquetas 1",
+            "ar": "بطاقة 1",
         }
     },
     {
         "orginal_text": "标签 2",
         "replaced_text": {
-            "zh": "标签 2",
+            "en": "Tags 2",
+            "es": "Etiquetas 2",
+            "ar": "بطاقة 2",
         }
     },
 ]
 
+##############################
+
+# 对 Front Matter 使用固定规则替换的函数
+def front_matter_replace(value, lang):
+    for index in range(len(value)):
+        element = value[index]
+        # print(f"element[{index}] = {element}")
+        for replacement in front_matter_replace_rules:
+            if replacement["orginal_text"] in element:
+                # 使用 replace 函数逐个替换
+                element = element.replace(
+                    replacement["orginal_text"], replacement["replaced_text"][lang])
+        value[index] = element
+        # print(f"element[{index}] = {element}")
+    return value
+
 # 定义调用 ChatGPT API 翻译的函数
 def translate_text(text, lang, type):
     target_lang = {
-        "zh": "Chinese"
+        "en": "English",
+        "es": "Spanish",
+        "ar": "Arabic"
     }[lang]
     
     # Front Matter 与正文内容使用不同的 prompt 翻译
+    # 翻译 Front Matter。
     if type == "front-matter":
         completion = openai.ChatCompletion.create(
             model="deepseek-chat",
@@ -115,7 +159,8 @@ def translate_text(text, lang, type):
                 {"role": "user", "content": f"Translate into {target_lang}:\n\n{text}\n"},
             ],
         )  
-    elif type == "main-body":
+    # 翻译正文
+    elif type== "main-body":
         completion = openai.ChatCompletion.create(
             model="deepseek-chat",
             messages=[
@@ -124,6 +169,7 @@ def translate_text(text, lang, type):
             ],
         )
 
+    # 获取翻译结果
     output_text = completion.choices[0].message.content
     return output_text
 
@@ -137,6 +183,7 @@ def translate_front_matter(front_matter, lang):
             # 如果在规则列表内，则不做任何翻译或替换操作
             processed_value = value
         translated_front_matter[key] = processed_value
+        # print(key, ":", processed_value)
     return translated_front_matter
 
 # 定义文章拆分函数
@@ -197,7 +244,8 @@ def translate_file(input_file, filename, lang):
     input_text = input_text.replace(marker_force_translate, "")
 
     # 删除其他出英文外其他语言译文中的 marker_written_in_en
-    input_text = input_text.replace(marker_written_in_en, "")
+    if lang != "en":
+        input_text = input_text.replace(marker_written_in_en, "")
 
     # 使用正则表达式来匹配 Front Matter
     front_matter_match = re.search(r'---\n(.*?)\n---', input_text, re.DOTALL)
@@ -216,6 +264,11 @@ def translate_file(input_file, filename, lang):
         # 暂时删除未处理的 Front Matter
         input_text = input_text.replace(
             "---\n"+front_matter_text+"\n---\n", "")
+    else:
+        # print("没有找到front matter，不进行处理。")
+        pass
+
+    # print(input_text) # debug 用，看看输入的是什么
 
     # 拆分文章
     paragraphs = input_text.split("\n\n")
@@ -231,7 +284,7 @@ def translate_file(input_file, filename, lang):
             current_paragraph += paragraph
         else:
             # 否则翻译当前段落，并将翻译结果添加到输出列表中
-            output_paragraphs.append(translate_text(current_paragraph, lang, "main-body"))
+            output_paragraphs.append(translate_text(current_paragraph, lang,"main-body"))
             current_paragraph = paragraph
 
     # 处理最后一个段落
@@ -241,11 +294,11 @@ def translate_file(input_file, filename, lang):
             input_text += "\n\n" + current_paragraph
         else:
             # 否则翻译当前段落，并将翻译结果添加到输出列表中
-            output_paragraphs.append(translate_text(current_paragraph, lang, "main-body"))
+            output_paragraphs.append(translate_text(current_paragraph, lang,"main-body"))
 
     # 如果还有未翻译的文本，就将它们添加到输出列表中
     if input_text:
-        output_paragraphs.append(translate_text(input_text, lang, "main-body"))
+        output_paragraphs.append(translate_text(input_text, lang,"main-body"))
 
     # 将输出段落合并为字符串
     output_text = "\n\n".join(output_paragraphs)
@@ -255,7 +308,12 @@ def translate_file(input_file, filename, lang):
         output_text = "---\n" + front_matter_text_processed + "---\n\n" + output_text
 
     # 加入由 ChatGPT 翻译的提示
-    output_text = output_text + tips_translated_by_chatgpt["zh"]
+    if lang == "en":
+        output_text = output_text + tips_translated_by_chatgpt["en"]
+    elif lang == "es":
+        output_text = output_text + tips_translated_by_chatgpt["es"]
+    elif lang == "ar":
+        output_text = output_text + tips_translated_by_chatgpt["ar"]
 
     # 最后，将占位词替换为对应的替换文本
     for placeholder, replacement in placeholder_dict.items():
@@ -268,6 +326,7 @@ def translate_file(input_file, filename, lang):
 # 按文件名称顺序排序
 file_list = os.listdir(dir_to_translate)
 sorted_file_list = sorted(file_list)
+# print(sorted_file_list)
 
 try:
     # 创建一个外部列表文件，存放已处理的 Markdown 文件名列表
@@ -289,15 +348,30 @@ try:
             with open(processed_list, "r", encoding="utf-8") as f:
                 processed_list_content = f.read()
 
-            if marker_force_translate in md_content or filename not in processed_list_content:
-                # 翻译为中文
-                translate_file(input_file, filename, "zh")
+            if marker_force_translate in md_content:  # 如果有强制翻译的标识，则执行这部分的代码
+                if marker_written_in_en in md_content:  # 翻译为除英文之外的语言
+                    print("Pass the en-en translation: ", filename)
+                    sys.stdout.flush()
+                    translate_file(input_file, filename, "es")
+                    translate_file(input_file, filename, "ar")
+                else:  # 翻译为所有语言
+                    translate_file(input_file, filename, "en")
+                    translate_file(input_file, filename, "es")
+                    translate_file(input_file, filename, "ar")
             elif filename in exclude_list:  # 不进行翻译
                 print(f"Pass the post in exclude_list: {filename}")
                 sys.stdout.flush()
-            else:  # 不进行翻译
+            elif filename in processed_list_content:  # 不进行翻译
                 print(f"Pass the post in processed_list: {filename}")
                 sys.stdout.flush()
+            elif marker_written_in_en in md_content:  # 翻译为除英文之外的语言
+                print(f"Pass the en-en translation: {filename}")
+                sys.stdout.flush()
+                for lang in ["es", "ar"]:
+                    translate_file(input_file, filename, lang)
+            else:  # 翻译为所有语言
+                for lang in ["en", "es", "ar"]:
+                    translate_file(input_file, filename, lang)
 
             # 将处理完成的文件名加到列表，下次跳过不处理
             if filename not in processed_list_content:
@@ -318,3 +392,4 @@ except Exception as e:
     print(f"An error has occurred: {e}")
     sys.stdout.flush()
     raise SystemExit(1)  # 1 表示非正常退出，可以根据需要更改退出码
+    # os.remove(input_file)  # 删除源文件
