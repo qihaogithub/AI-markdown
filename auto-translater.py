@@ -6,13 +6,14 @@ import re
 import yaml  # pip install PyYAML
 import env
 import json
+from env import CHATGPT_MODEL
 
 # 设置 OpenAI API Key 和 API Base 参数，通过 env.py 传入
 openai.api_key = os.environ.get("CHATGPT_API_KEY")
 openai.api_base = os.environ.get("CHATGPT_API_BASE")
 
 # 设置最大输入字段，超出会拆分输入，防止超出输入字数限制
-max_length = 1800
+max_length = 2500
 
 # 设置翻译的路径
 dir_to_translate = "testdir/to-translate"
@@ -34,6 +35,21 @@ marker_written_in_zh = "\n> 本文原始语言为中文。\n"
 # 即使在已处理的列表中，仍需要重新翻译的标记
 marker_force_translate = "\n[translate]\n"
 
+# 在文件开头添加以下代码来读取 JSON 文件
+def load_replace_rules(file_path):
+    with open(file_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    return data['replace_rules'], data['front_matter_replace_rules']
+
+# 替换原有的 replace_rules 和 front_matter_replace_rules 定义
+replace_rules, front_matter_replace_rules = load_replace_rules('replace_rules.json')
+
+def front_matter_replace(value, lang):
+    for rule in front_matter_replace_rules:
+        if value == rule["orginal_text"]:
+            return rule["replaced_text"][lang]
+    return value  # 如果没有匹配的规则，返回原始值
+
 # Front Matter 处理规则
 front_matter_translation_rules = {
     # 调用 ChatGPT 自动翻译
@@ -47,22 +63,10 @@ front_matter_translation_rules = {
     # 未添加的字段将默认不翻译
 }
 
-# 在 load_replace_rules 函数之后添加以下函数定义
-
-def front_matter_replace(value, lang):
-    for rule in front_matter_replace_rules:
-        if value == rule["orginal_text"]:
-            return rule["replaced_text"][lang]
-    return value  # 如果没有匹配的规则，返回原始值
-
-# 在文件开头添加以下代码来读取 JSON 文件
-def load_replace_rules(file_path):
-    with open(file_path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
-    return data['replace_rules'], data['front_matter_replace_rules']
-
-# 替换原有的 replace_rules 和 front_matter_replace_rules 定义
-replace_rules, front_matter_replace_rules = load_replace_rules('replace_rules.json')
+def split_content_and_codeblocks(text):
+    pattern = r'(```[\s\S]*?```)'
+    parts = re.split(pattern, text)
+    return [{'type': 'code' if i % 2 else 'text', 'content': part.strip()} for i, part in enumerate(parts) if part.strip()]
 
 # 定义调用 ChatGPT API 翻译的函数
 def translate_text(text, lang, type):
@@ -73,7 +77,7 @@ def translate_text(text, lang, type):
     # Front Matter 与正文内容使用不同的 prompt 翻译
     if type == "front-matter":
         completion = openai.ChatCompletion.create(
-            model="deepseek-chat",
+            model=CHATGPT_MODEL,  # 使用从 env.py 导入的模型名称
             messages=[
                 {"role": "system", "content": "You are a professional translation engine, please translate the text into a colloquial, professional, elegant and fluent content, without the style of machine translation. You must only translate the text content, never interpret it."},
                 {"role": "user", "content": f"Translate into {target_lang}:\n\n{text}\n"},
@@ -81,7 +85,7 @@ def translate_text(text, lang, type):
         )  
     elif type == "main-body":
         completion = openai.ChatCompletion.create(
-            model="deepseek-chat",
+            model=CHATGPT_MODEL,  # 使用从 env.py 导入的模型名称
             messages=[
                 {"role": "system", "content": "You are a professional translation engine, please translate the text into a colloquial, professional, elegant and fluent content, without the style of machine translation. You must maintain the original markdown format. You must not translate the `[to_be_replace[x]]` field.You must only translate the text content, never interpret it."},
                 {"role": "user", "content": f"Translate into {target_lang}:\n\n{text}\n"},
@@ -129,6 +133,21 @@ def split_text(text, max_length):
     output_text = "\n\n".join(output_paragraphs)
 
     return output_text
+
+def translate_and_append(chunk, lang, output_paragraphs):
+    if chunk:
+        # 分割文本和代码块
+        parts = split_content_and_codeblocks(chunk)
+        translated_parts = []
+        for part in parts:
+            if part['type'] == 'text':
+                translated_text = translate_text(part['content'].strip(), lang, "main-body")
+                translated_parts.append(translated_text)
+            else:  # 代码块
+                translated_parts.append(part['content'])
+        
+        translated_chunk = "\n\n".join(translated_parts)
+        output_paragraphs.append(translated_chunk)
 
 # 定义翻译文的函数
 def translate_file(input_file, filename, lang):
@@ -182,24 +201,6 @@ def translate_file(input_file, filename, lang):
     paragraphs = input_text.split("\n\n")
     output_paragraphs = []
     current_chunk = ""
-    
-    # 可以被注释的代码段开始
-    # # 创建用于保存分段情况的目录
-    # segment_dir = "testdir/segment"
-    # if not os.path.exists(segment_dir):
-    #     os.makedirs(segment_dir)
-    # segment_file = os.path.join(segment_dir, f"{filename}_segmented.md")
-    # segmented_content = ""
-    # 可以被注释的代码段结束
-
-    def translate_and_append(chunk):
-        if chunk:
-            # 可以被注释的代码段开始
-            # nonlocal segmented_content
-            # segmented_content += chunk + "\n\n--- 分段标记 ---\n\n"
-            # 可以被注释的代码段结束
-            translated_chunk = translate_text(chunk.strip(), lang, "main-body")
-            output_paragraphs.append(translated_chunk)
 
     for paragraph in paragraphs:
         if len(current_chunk) + len(paragraph) + 2 <= max_length:
@@ -208,7 +209,7 @@ def translate_file(input_file, filename, lang):
             current_chunk += paragraph
         else:
             # 如果当前块不为空，先翻译它
-            translate_and_append(current_chunk)
+            translate_and_append(current_chunk, lang, output_paragraphs)
             
             # 检查当前段落是否超过最大长度
             if len(paragraph) > max_length:
@@ -220,17 +221,17 @@ def translate_file(input_file, filename, lang):
                         current_sentence_chunk += sentence + " "
                     else:
                         # 翻译当前句子块
-                        translate_and_append(current_sentence_chunk)
+                        translate_and_append(current_sentence_chunk, lang, output_paragraphs)
                         current_sentence_chunk = sentence + " "
                 
                 # 处理最后一个句子块
-                translate_and_append(current_sentence_chunk)
+                translate_and_append(current_sentence_chunk, lang, output_paragraphs)
             else:
                 # 如果段落没有超过最大长度，直接作为新的当前块
                 current_chunk = paragraph
 
     # 处理最后一个块
-    translate_and_append(current_chunk)
+    translate_and_append(current_chunk, lang, output_paragraphs)
 
     # 合并相邻的短块
     merged_paragraphs = []
@@ -255,19 +256,9 @@ def translate_file(input_file, filename, lang):
         # 加Front Matter
         output_text = "---\n" + front_matter_text_processed + "---\n\n" + output_text
 
-    # 加入由 ChatGPT 翻译的提示
-    # output_text = output_text + tips_translated_by_chatgpt["zh"]
-
     # 最后，将占位词替换为对应的替换文本
     for placeholder, replacement in placeholder_dict.items():
         output_text = output_text.replace(placeholder, replacement)
-
-    # 可以被注释的代码段开始
-    # # 保存分段情况到文件
-    # with open(segment_file, "w", encoding="utf-8") as f:
-    #     f.write(segmented_content)
-    # print(f"分段情况已保存到：{segment_file}")
-    # 可以被注释的代码段结束
 
     # 写入输出文件
     with open(output_file, "w", encoding="utf-8") as f:
@@ -275,11 +266,12 @@ def translate_file(input_file, filename, lang):
 
     print(f"翻译完成，输出文件：{output_file}")
 
-# 按文件名称顺序排序
-file_list = os.listdir(dir_to_translate)
-sorted_file_list = sorted(file_list)
-
+# 主程序
 try:
+    # 按文件名称顺序排序
+    file_list = os.listdir(dir_to_translate)
+    sorted_file_list = sorted(file_list)
+
     # 创建一个外部列表文件，存放已处理的 Markdown 文件名列表
     if not os.path.exists(processed_list):
         with open(processed_list, "w", encoding="utf-8") as f:
@@ -291,7 +283,7 @@ try:
         if filename.endswith(".md"):
             input_file = os.path.join(dir_to_translate, filename)
 
-            # 读取 Markdown 文件的内容
+            # ��取 Markdown 文件的内容
             with open(input_file, "r", encoding="utf-8") as f:
                 md_content = f.read()
 
@@ -328,4 +320,3 @@ except Exception as e:
     print(f"An error has occurred: {e}")
     sys.stdout.flush()
     raise SystemExit(1)  # 1 表示非正常退出，可以根据需要更改退出码
-
