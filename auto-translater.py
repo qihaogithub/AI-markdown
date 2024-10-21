@@ -6,7 +6,8 @@ import re
 import yaml  # pip install PyYAML
 import env
 import json
-from env import CHATGPT_MODEL
+import logging
+from datetime import datetime
 
 # 设置 OpenAI API Key 和 API Base 参数，通过 env.py 传入
 openai.api_key = os.environ.get("CHATGPT_API_KEY")
@@ -70,29 +71,42 @@ def split_content_and_codeblocks(text):
 
 # 定义调用 ChatGPT API 翻译的函数
 def translate_text(text, lang, type):
+    logging.info(f"开始翻译文本，语言：{lang}，类型：{type}")
     target_lang = {
         "zh": "Chinese"
     }[lang]
     
+    # 记录输入文本
+    logging.info(f"输入文本：\n{text}")
+    
     # Front Matter 与正文内容使用不同的 prompt 翻译
     if type == "front-matter":
-        completion = openai.ChatCompletion.create(
-            model=CHATGPT_MODEL,  # 使用从 env.py 导入的模型名称
-            messages=[
-                {"role": "system", "content": "You are a professional translation engine, please translate the text into a colloquial, professional, elegant and fluent content, without the style of machine translation. You must only translate the text content, never interpret it."},
-                {"role": "user", "content": f"Translate into {target_lang}:\n\n{text}\n"},
-            ],
-        )  
+        system_content = "You are a professional translation engine, please translate the text into a colloquial, professional, elegant and fluent content, without the style of machine translation. You must only translate the text content, never interpret it."
     elif type == "main-body":
-        completion = openai.ChatCompletion.create(
-            model=CHATGPT_MODEL,  # 使用从 env.py 导入的模型名称
-            messages=[
-                {"role": "system", "content": "You are a professional translation engine, please translate the text into a colloquial, professional, elegant and fluent content, without the style of machine translation. You must maintain the original markdown format. You must not translate the `[to_be_replace[x]]` field.You must only translate the text content, never interpret it."},
-                {"role": "user", "content": f"Translate into {target_lang}:\n\n{text}\n"},
-            ],
-        )
+        system_content = "You are a professional translation engine, please translate the text into a colloquial, professional, elegant and fluent content, without the style of machine translation. You must maintain the original markdown format. You must not translate the `[to_be_replace[x]]` field.You must only translate the text content, never interpret it."
+    
+    # 记录系统提示
+    logging.info(f"系统提示：\n{system_content}")
+    
+    user_content = f"Translate into {target_lang}:\n\n{text}\n"
+    
+    # 记录用户提示
+    logging.info(f"用户提示：\n{user_content}")
+    
+    completion = openai.ChatCompletion.create(
+        model="deepseek-chat",
+        messages=[
+            {"role": "system", "content": system_content},
+            {"role": "user", "content": user_content},
+        ],
+    )
 
     output_text = completion.choices[0].message.content
+    
+    # 记录 AI 输出
+    logging.info(f"AI 输出：\n{output_text}")
+    
+    logging.info("翻译完成")
     return output_text
 
 # Front Matter 处理规则
@@ -151,7 +165,7 @@ def translate_and_append(chunk, lang, output_paragraphs):
 
 # 定义翻译文的函数
 def translate_file(input_file, filename, lang):
-    print(f"开始翻译文件：{filename}")
+    logging.info(f"开始翻译文件：{filename}，目标语言：{lang}")
     sys.stdout.flush()
 
     # 定义输出文件
@@ -186,7 +200,7 @@ def translate_file(input_file, filename, lang):
         # 使PyYAML加载YAML格式的数据
         front_matter_data = yaml.safe_load(front_matter_text)
 
-        # 按照前文的规则对 Front Matter 进行翻译
+        # 按照前文规则对 Front Matter 进行翻译
         front_matter_data = translate_front_matter(front_matter_data, lang)
 
         # 将处理完的数据转换回 YAML
@@ -264,10 +278,31 @@ def translate_file(input_file, filename, lang):
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(output_text)
 
-    print(f"翻译完成，输出文件：{output_file}")
+    logging.info(f"翻译后的内容已写入文件：{output_file}")
+
+    logging.info(f"文件翻译完成：{filename}")
+
+# 添加日志设置函数
+def setup_logging():
+    log_dir = "log"
+    current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_file = os.path.join(log_dir, f"translation_log_{current_time}.log")
+    
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(log_file, encoding='utf-8'),
+            logging.StreamHandler()
+        ]
+    )
+
+# 在主程序开始之前调用 setup_logging 函数
+setup_logging()
 
 # 主程序
 try:
+    logging.info("开始执行翻译脚本")
     # 按文件名称顺序排序
     file_list = os.listdir(dir_to_translate)
     sorted_file_list = sorted(file_list)
@@ -281,9 +316,10 @@ try:
     # 遍历目录下的所有.md文件，并进行翻译
     for filename in sorted_file_list:
         if filename.endswith(".md"):
+            logging.info(f"处理文件：{filename}")
             input_file = os.path.join(dir_to_translate, filename)
 
-            # ��取 Markdown 文件的内容
+            # 读取 Markdown 文件的内容
             with open(input_file, "r", encoding="utf-8") as f:
                 md_content = f.read()
 
@@ -311,12 +347,10 @@ try:
             # 强制将缓冲区中的数据刷新到终端中，使用 GitHub Action 时方便实时查看过程
             sys.stdout.flush()
             
-    # 所有任务完成的提示
-    print("Congratulations! All files processed done.")
+    logging.info("所有文件处理完成")
+    logging.info("Congratulations! All files processed done.")
     sys.stdout.flush()
 
 except Exception as e:
-    # 捕获异常并输出错误信息
-    print(f"An error has occurred: {e}")
-    sys.stdout.flush()
+    logging.error(f"发生错误：{str(e)}", exc_info=True)
     raise SystemExit(1)  # 1 表示非正常退出，可以根据需要更改退出码
