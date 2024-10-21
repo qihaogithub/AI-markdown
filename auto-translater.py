@@ -26,11 +26,11 @@ processed_list = "processed_list.txt"
 
 # 由 ChatGPT 翻译的提示
 tips_translated_by_chatgpt = {
-    "zh": "\n\n> 本文是使用 ChatGPT 翻译的，如有遗漏请[**反馈**](https://github.com/linyuxuanlin/Wiki_MkDocs/issues/new)。"
+    "zh": "\n\n> 本文是使用AI翻译的，如有遗漏请[**反馈**]( )。"
 }
 
 # 文章使用英文撰写的提示，避免本身为英文的文章被重复翻译为英文
-marker_written_in_en = "\n> This post was originally written in English.\n"
+# marker_written_in_en = "\n> This post was originally written in English.\n"
 # 即使在已处理的列表中，仍需要重新翻译的标记
 marker_force_translate = "\n[translate]\n"
 
@@ -166,9 +166,9 @@ def split_text(text, max_length):
 
     return output_text
 
-# 定义翻译文件的函数
+# 定义翻译文的函数
 def translate_file(input_file, filename, lang):
-    print(f"Translating into {lang}: {filename}")
+    print(f"开始翻译文件：{filename}")
     sys.stdout.flush()
 
     # 定义输出文件
@@ -196,14 +196,11 @@ def translate_file(input_file, filename, lang):
     # 删除译文中指示强制翻译的 marker
     input_text = input_text.replace(marker_force_translate, "")
 
-    # 删除其他出英文外其他语言译文中的 marker_written_in_en
-    input_text = input_text.replace(marker_written_in_en, "")
-
     # 使用正则表达式来匹配 Front Matter
     front_matter_match = re.search(r'---\n(.*?)\n---', input_text, re.DOTALL)
     if front_matter_match:
         front_matter_text = front_matter_match.group(1)
-        # 使用PyYAML加载YAML格式的数据
+        # 使PyYAML加载YAML格式的数据
         front_matter_data = yaml.safe_load(front_matter_text)
 
         # 按照前文的规则对 Front Matter 进行翻译
@@ -219,43 +216,70 @@ def translate_file(input_file, filename, lang):
 
     # 拆分文章
     paragraphs = input_text.split("\n\n")
-    input_text = ""
     output_paragraphs = []
-    current_paragraph = ""
+    current_chunk = ""
+
+    def translate_and_append(chunk):
+        if chunk:
+            translated_chunk = translate_text(chunk.strip(), lang, "main-body")
+            output_paragraphs.append(translated_chunk)
 
     for paragraph in paragraphs:
-        if len(current_paragraph) + len(paragraph) + 2 <= max_length:
-            # 如果当前段落加上新段落的长度不超过最大长度，就将它们合并
-            if current_paragraph:
-                current_paragraph += "\n\n"
-            current_paragraph += paragraph
+        if len(current_chunk) + len(paragraph) + 2 <= max_length:
+            if current_chunk:
+                current_chunk += "\n\n"
+            current_chunk += paragraph
         else:
-            # 否则翻译当前段落，并将翻译结果添加到输出列表中
-            output_paragraphs.append(translate_text(current_paragraph, lang, "main-body"))
-            current_paragraph = paragraph
+            # 如果当前块不为空，先翻译它
+            translate_and_append(current_chunk)
+            
+            # 检查当前段落是否超过最大长度
+            if len(paragraph) > max_length:
+                # 如果单个段落超过最大长度，按句子拆分
+                sentences = re.split(r'(?<=[.!?])\s+', paragraph)
+                current_sentence_chunk = ""
+                for sentence in sentences:
+                    if len(current_sentence_chunk) + len(sentence) <= max_length:
+                        current_sentence_chunk += sentence + " "
+                    else:
+                        # 翻译当前句子块
+                        translate_and_append(current_sentence_chunk)
+                        current_sentence_chunk = sentence + " "
+                
+                # 处理最后一个句子块
+                translate_and_append(current_sentence_chunk)
+            else:
+                # 如果段落没有超过最大长度，直接作为新的当前块
+                current_chunk = paragraph
 
-    # 处理最后一个段落
-    if current_paragraph:
-        if len(current_paragraph) + len(input_text) <= max_length:
-            # 如果当前段落加上之前的文本长度不超过最大长度，就将它们合并
-            input_text += "\n\n" + current_paragraph
+    # 处理最后一个块
+    translate_and_append(current_chunk)
+
+    # 合并相邻的短块
+    merged_paragraphs = []
+    temp_chunk = ""
+    for paragraph in output_paragraphs:
+        if len(temp_chunk) + len(paragraph) + 2 <= max_length:
+            if temp_chunk:
+                temp_chunk += "\n\n"
+            temp_chunk += paragraph
         else:
-            # 否则翻译当前段落，并将翻译结果添加到输出列表中
-            output_paragraphs.append(translate_text(current_paragraph, lang, "main-body"))
-
-    # 如果还有未翻译的文本，就将它们添加到输出列表中
-    if input_text:
-        output_paragraphs.append(translate_text(input_text, lang, "main-body"))
+            if temp_chunk:
+                merged_paragraphs.append(temp_chunk)
+            temp_chunk = paragraph
+    
+    if temp_chunk:
+        merged_paragraphs.append(temp_chunk)
 
     # 将输出段落合并为字符串
-    output_text = "\n\n".join(output_paragraphs)
+    output_text = "\n\n".join(merged_paragraphs)
 
     if front_matter_match:
-        # 加入 Front Matter
+        # 加Front Matter
         output_text = "---\n" + front_matter_text_processed + "---\n\n" + output_text
 
     # 加入由 ChatGPT 翻译的提示
-    output_text = output_text + tips_translated_by_chatgpt["zh"]
+    # output_text = output_text + tips_translated_by_chatgpt["zh"]
 
     # 最后，将占位词替换为对应的替换文本
     for placeholder, replacement in placeholder_dict.items():
@@ -264,6 +288,8 @@ def translate_file(input_file, filename, lang):
     # 写入输出文件
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(output_text)
+
+    print(f"翻译完成，输出文件：{output_file}")
 
 # 按文件名称顺序排序
 file_list = os.listdir(dir_to_translate)
@@ -318,3 +344,4 @@ except Exception as e:
     print(f"An error has occurred: {e}")
     sys.stdout.flush()
     raise SystemExit(1)  # 1 表示非正常退出，可以根据需要更改退出码
+
