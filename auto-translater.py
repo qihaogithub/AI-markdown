@@ -4,14 +4,20 @@ import openai  # pip install openai
 import sys
 import re
 import yaml  # pip install PyYAML
-import env
+from env import *
 import json
 import logging
 from datetime import datetime
+import requests
 
 # 设置 OpenAI API Key 和 API Base 参数，通过 env.py 传入
 openai.api_key = os.environ.get("CHATGPT_API_KEY")
 openai.api_base = os.environ.get("CHATGPT_API_BASE")
+
+# Ollama设置
+USE_OLLAMA = os.environ.get("USE_OLLAMA", "false").lower() == "true"
+OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL")
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL")
 
 # 设置最大输入字段，超出会拆分输入，防止超出输入字数限制
 max_length = 2500
@@ -76,36 +82,45 @@ def translate_text(text, lang, type):
         "zh": "Chinese"
     }[lang]
     
-    # 记录输入文本
     logging.info(f"输入文本：\n{text}")
     
-    # Front Matter 与正文内容使用不同的 prompt 翻译
     if type == "front-matter":
         system_content = "You are a professional translation engine, please translate the text into a colloquial, professional, elegant and fluent content, without the style of machine translation. You must only translate the text content, never interpret it."
     elif type == "main-body":
         system_content = "You are a professional translation engine, please translate the text into a colloquial, professional, elegant and fluent content, without the style of machine translation. You must maintain the original markdown format. You must not translate the `[to_be_replace[x]]` field.You must only translate the text content, never interpret it."
     
-    # 记录系统提示
     logging.info(f"系统提示：\n{system_content}")
     
     user_content = f"Translate into {target_lang}:\n\n{text}\n"
     
-    # 记录用户提示
     logging.info(f"用户提示：\n{user_content}")
     
-    completion = openai.ChatCompletion.create(
-        model="deepseek-chat",
-        messages=[
-            {"role": "system", "content": system_content},
-            {"role": "user", "content": user_content},
-        ],
-    )
-
-    output_text = completion.choices[0].message.content
+    if USE_OLLAMA:
+        try:
+            response = requests.post(
+                f"{OLLAMA_BASE_URL}/api/generate",
+                json={
+                    "model": OLLAMA_MODEL,
+                    "prompt": f"{system_content}\n\n{user_content}",
+                    "stream": False
+                }
+            )
+            response.raise_for_status()
+            output_text = response.json()["response"]
+        except requests.RequestException as e:
+            logging.error(f"Ollama API调用失败：{str(e)}")
+            raise
+    else:
+        completion = openai.ChatCompletion.create(
+            model="deepseek-chat",
+            messages=[
+                {"role": "system", "content": system_content},
+                {"role": "user", "content": user_content},
+            ],
+        )
+        output_text = completion.choices[0].message.content
     
-    # 记录 AI 输出
     logging.info(f"AI 输出：\n{output_text}")
-    
     logging.info("翻译完成")
     return output_text
 
@@ -300,6 +315,12 @@ def setup_logging():
 # 在主程序开始之前调用 setup_logging 函数
 setup_logging()
 
+# 在主程序开始前添加Ollama使用提示
+if USE_OLLAMA:
+    logging.info(f"使用Ollama本地模型：{OLLAMA_MODEL}")
+else:
+    logging.info("使用OpenAI API")
+
 # 主程序
 try:
     logging.info("开始执行翻译脚本")
@@ -354,3 +375,4 @@ try:
 except Exception as e:
     logging.error(f"发生错误：{str(e)}", exc_info=True)
     raise SystemExit(1)  # 1 表示非正常退出，可以根据需要更改退出码
+

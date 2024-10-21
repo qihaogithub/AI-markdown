@@ -1,0 +1,107 @@
+2024-10-21 16:41:25,545 - INFO - 使用Ollama本地模型：qwen2.5:3b
+2024-10-21 16:41:25,545 - INFO - 开始执行翻译脚本
+2024-10-21 16:41:25,546 - INFO - 处理文件：test.md
+2024-10-21 16:41:25,547 - INFO - 开始翻译文件：test.md，目标语言：zh
+2024-10-21 16:41:25,548 - INFO - 开始翻译文本，语言：zh，类型：main-body
+2024-10-21 16:41:25,548 - INFO - 输入文本：
+# Nodes (sections are categories in Comfy menu)
+
+## Line Extractors
+2024-10-21 16:41:25,548 - INFO - 系统提示：
+You are a professional translation engine, please translate the text into a colloquial, professional, elegant and fluent content, without the style of machine translation. You must maintain the original markdown format. You must not translate the `[to_be_replace[x]]` field.You must only translate the text content, never interpret it.
+2024-10-21 16:41:25,548 - INFO - 用户提示：
+Translate into Chinese:
+
+# Nodes (sections are categories in Comfy menu)
+
+## Line Extractors
+
+2024-10-21 16:41:28,814 - INFO - AI 输出：
+# 节点（Comfort菜单中的部分相当于类别）
+
+## 提取线
+2024-10-21 16:41:28,814 - INFO - 翻译完成
+2024-10-21 16:41:28,815 - INFO - 开始翻译文本，语言：zh，类型：main-body
+2024-10-21 16:41:28,815 - INFO - 输入文本：
+| Preprocessor Node       | sd-webui-controlnet/other                            | [to_be_replace[1]]/T2I-Adapter                                                                                                                                                                                                    |
+| ----------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Binary Lines            | binary                                               | control_scribble                                                                                                                                                                                                          |
+| Canny Edge              | canny                                                | control_v11p_sd15_canny <br> control_canny <br> t2iadapter_canny                                                                                                                                                          |
+| HED Soft-Edge Lines     | hed                                                  | control_v11p_sd15_softedge <br> control_hed                                                                                                                                                                               |
+| Standard Lineart        | standard_lineart                                     | control_v11p_sd15_lineart                                                                                                                                                                                                 |
+| Realistic Lineart       | lineart (or `lineart_coarse` if `coarse` is enabled) | control_v11p_sd15_lineart                                                                                                                                                                                                 |
+| Anime Lineart           | lineart_anime                                        | control_v11p_sd15s2_lineart_anime                                                                                                                                                                                         |
+| Manga Lineart           | lineart_anime_denoise                                | control_v11p_sd15s2_lineart_anime                                                                                                                                                                                         |
+| M-LSD Lines             | mlsd                                                 | control_v11p_sd15_mlsd <br> control_mlsd                                                                                                                                                                                  |
+| PiDiNet Soft-Edge Lines | pidinet                                              | control_v11p_sd15_softedge <br> control_scribble                                                                                                                                                                          |
+| Scribble Lines          | scribble                                             | control_v11p_sd15_scribble <br> control_scribble                                                                                                                                                                          |
+| Scribble XDoG Lines     | scribble_xdog                                        | control_v11p_sd15_scribble <br> control_scribble                                                                                                                                                                          |
+| Fake Scribble Lines     | scribble_hed                                         | control_v11p_sd15_scribble <br> control_scribble                                                                                                                                                                          |
+| TEED Soft-Edge Lines    | teed                                                 | [controlnet-sd-xl-1.0-softedge-dexined](https://huggingface.co/SargeZT/controlnet-sd-xl-1.0-softedge-dexined/blob/main/controlnet-sd-xl-1.0-softedge-dexined.safetensors) <br> control_v11p_sd15_softedge (Theoretically) |
+| Scribble PiDiNet Lines  | scribble_pidinet                                     | control_v11p_sd15_scribble <br> control_scribble                                                                                                                                                                          |
+| AnyLine Lineart         |                                                      | mistoLine_fp16.safetensors <br> mistoLine_rank256 <br> control_v11p_sd15s2_lineart_anime <br> control_v11p_sd15_lineart                                                                                                   |
+2024-10-21 16:41:28,815 - INFO - 系统提示：
+You are a professional translation engine, please translate the text into a colloquial, professional, elegant and fluent content, without the style of machine translation. You must maintain the original markdown format. You must not translate the `[to_be_replace[x]]` field.You must only translate the text content, never interpret it.
+2024-10-21 16:41:28,816 - INFO - 用户提示：
+Translate into Chinese:
+
+| Preprocessor Node       | sd-webui-controlnet/other                            | [to_be_replace[1]]/T2I-Adapter                                                                                                                                                                                                    |
+| ----------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Binary Lines            | binary                                               | control_scribble                                                                                                                                                                                                          |
+| Canny Edge              | canny                                                | control_v11p_sd15_canny <br> control_canny <br> t2iadapter_canny                                                                                                                                                          |
+| HED Soft-Edge Lines     | hed                                                  | control_v11p_sd15_softedge <br> control_hed                                                                                                                                                                               |
+| Standard Lineart        | standard_lineart                                     | control_v11p_sd15_lineart                                                                                                                                                                                                 |
+| Realistic Lineart       | lineart (or `lineart_coarse` if `coarse` is enabled) | control_v11p_sd15_lineart                                                                                                                                                                                                 |
+| Anime Lineart           | lineart_anime                                        | control_v11p_sd15s2_lineart_anime                                                                                                                                                                                         |
+| Manga Lineart           | lineart_anime_denoise                                | control_v11p_sd15s2_lineart_anime                                                                                                                                                                                         |
+| M-LSD Lines             | mlsd                                                 | control_v11p_sd15_mlsd <br> control_mlsd                                                                                                                                                                                  |
+| PiDiNet Soft-Edge Lines | pidinet                                              | control_v11p_sd15_softedge <br> control_scribble                                                                                                                                                                          |
+| Scribble Lines          | scribble                                             | control_v11p_sd15_scribble <br> control_scribble                                                                                                                                                                          |
+| Scribble XDoG Lines     | scribble_xdog                                        | control_v11p_sd15_scribble <br> control_scribble                                                                                                                                                                          |
+| Fake Scribble Lines     | scribble_hed                                         | control_v11p_sd15_scribble <br> control_scribble                                                                                                                                                                          |
+| TEED Soft-Edge Lines    | teed                                                 | [controlnet-sd-xl-1.0-softedge-dexined](https://huggingface.co/SargeZT/controlnet-sd-xl-1.0-softedge-dexined/blob/main/controlnet-sd-xl-1.0-softedge-dexined.safetensors) <br> control_v11p_sd15_softedge (Theoretically) |
+| Scribble PiDiNet Lines  | scribble_pidinet                                     | control_v11p_sd15_scribble <br> control_scribble                                                                                                                                                                          |
+| AnyLine Lineart         |                                                      | mistoLine_fp16.safetensors <br> mistoLine_rank256 <br> control_v11p_sd15s2_lineart_anime <br> control_v11p_sd15_lineart                                                                                                   |
+
+2024-10-21 16:42:35,512 - INFO - AI 输出：
+| 预处理器节点       | sd-webui-controlnet/other                            | [to_be_replace[1]]/T2I-Adapter                                                                                                                                                                                                    |
+| ----------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 二进制线条            | binary                                               | control_scribble                                                                                                                                                                                                          |
+| Canny 边缘              | canny                                                | control_v11p_sd15_canny <br> control_canny <br> t2iadapter_canny                                                                                                                                                          |
+| HED 软边缘线条         | hed                                                  | control_v11p_sd15_softedge <br> control_hed                                                                                                                                                                               |
+| 标准线稿              | standard_lineart                                     | control_v11p_sd15_lineart                                                                                                                                                                                                 |
+| 真实线稿              | lineart (或 `lineart_coarse` 如果开启 `coarse`) | control_v11p_sd15_lineart                                                                                                                                                                                                 |
+| 动漫线稿              | lineart_anime                                        | control_v11p_sd15s2_lineart_anime                                                                                                                                                                                         |
+| 漫画线稿              | lineart_anime_denoise                                | control_v11p_sd15s2_lineart_anime                                                                                                                                                                                         |
+| M-LSD 线条             | mlsd                                                 | control_v11p_sd15_mlsd <br> control_mlsd                                                                                                                                                                                  |
+| PiDiNet 软边缘线条     | pidinet                                              | control_v11p_sd15_softedge <br> control_scribble                                                                                                                                                                          |
+| 笔刷线条              | scribble                                             | control_v11p_sd15_scribble <br> control_scribble                                                                                                                                                                          |
+| 笔刷XDoG线条          | scribble_xdog                                        | control_v11p_sd15_screbbble <br> control_scribble                                                                                                                                                                            |
+| 虚拟笔刷线条          | scribble_hed                                         | control_v11p_sd15_screbbble <br> control_scribble                                                                                                                                                                            |
+| TEED 软边缘线条        | teed                                                 | [controlnet-sd-xl-1.0-softedge-dexined](https://huggingface.co/SargeZT/controlnet-sd-xl-1.0-softedge-dexined/blob/main/controlnet-sd-xl-1.0-softedge-dexined.safetensors) <br> control_v11p_sd15_softedge (理论上有) |
+| 笔刷 PiDiNet 线条      | scribble_pidinet                                     | control_v11p_sd15_scribble <br> control_scribble                                                                                                                                                                          |
+| 任何线稿线稿          |                                                      | mistoLine_fp16.safetensors <br> mistoLine_rank256 <br> control_v11p_sd15s2_lineart_anime <br> control_v11p_sd15_lineart                                                                                                   |
+2024-10-21 16:42:35,516 - INFO - 翻译完成
+2024-10-21 16:42:35,517 - INFO - 开始翻译文本，语言：zh，类型：main-body
+2024-10-21 16:42:35,517 - INFO - 输入文本：
+# Nodes (sections are categories in Comfy menu)
+
+## Line Extractors
+2024-10-21 16:42:35,517 - INFO - 系统提示：
+You are a professional translation engine, please translate the text into a colloquial, professional, elegant and fluent content, without the style of machine translation. You must maintain the original markdown format. You must not translate the `[to_be_replace[x]]` field.You must only translate the text content, never interpret it.
+2024-10-21 16:42:35,517 - INFO - 用户提示：
+Translate into Chinese:
+
+# Nodes (sections are categories in Comfy menu)
+
+## Line Extractors
+
+2024-10-21 16:42:38,279 - INFO - AI 输出：
+# 节点（Comfy 菜单中的部分相当于分类）
+
+## 提取线
+2024-10-21 16:42:38,280 - INFO - 翻译完成
+2024-10-21 16:42:38,284 - INFO - 翻译后的内容已写入文件：testdir/docs/zh/test.md
+2024-10-21 16:42:38,284 - INFO - 文件翻译完成：test.md
+2024-10-21 16:42:38,284 - INFO - 所有文件处理完成
+2024-10-21 16:42:38,284 - INFO - Congratulations! All files processed done.

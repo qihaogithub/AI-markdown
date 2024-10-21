@@ -23,3 +23,6 @@ python auto-translater.py
 
 强制重新翻译
 在文档底部添加[translate]，再执行脚本，就会重新翻译
+
+测试 ollama 是否运行
+curl -X POST http://localhost:11434/api/generate -d '{"model": "qwen2.5:3b", "prompt": "Hello, world!"}'

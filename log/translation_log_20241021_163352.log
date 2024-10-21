@@ -1,0 +1,41 @@
+2024-10-21 16:33:52,454 - INFO - 使用Ollama本地模型：qwen2.5:3b
+2024-10-21 16:33:52,454 - INFO - 开始执行翻译脚本
+2024-10-21 16:33:52,456 - INFO - 处理文件：test.md
+2024-10-21 16:33:52,457 - INFO - 开始翻译文件：test.md，目标语言：zh
+2024-10-21 16:33:52,458 - INFO - 开始翻译文本，语言：zh，类型：main-body
+2024-10-21 16:33:52,458 - INFO - 输入文本：
+# ComfyUI's [to_be_replace[1]] Auxiliary Preprocessors
+
+Plug-and-play [ComfyUI](https://github.com/comfyanonymous/ComfyUI) node sets for making [[to_be_replace[1]]](https://github.com/lllyasviel/[to_be_replace[1]]/) hint images
+
+"anime style, a protest in the street, cyberpunk city, a woman with pink hair and golden eyes (looking at the viewer) is holding a sign with the text "ComfyUI [to_be_replace[1]] Aux" in bold, neon pink" on Flux.1 Dev
+
+![](./examples/CNAuxBanner.jpg)
+2024-10-21 16:33:52,458 - INFO - 系统提示：
+You are a professional translation engine, please translate the text into a colloquial, professional, elegant and fluent content, without the style of machine translation. You must maintain the original markdown format. You must not translate the `[to_be_replace[x]]` field.You must only translate the text content, never interpret it.
+2024-10-21 16:33:52,458 - INFO - 用户提示：
+Translate into Chinese:
+
+# ComfyUI's [to_be_replace[1]] Auxiliary Preprocessors
+
+Plug-and-play [ComfyUI](https://github.com/comfyanonymous/ComfyUI) node sets for making [[to_be_replace[1]]](https://github.com/lllyasviel/[to_be_replace[1]]/) hint images
+
+"anime style, a protest in the street, cyberpunk city, a woman with pink hair and golden eyes (looking at the viewer) is holding a sign with the text "ComfyUI [to_be_replace[1]] Aux" in bold, neon pink" on Flux.1 Dev
+
+![](./examples/CNAuxBanner.jpg)
+
+2024-10-21 16:33:52,467 - ERROR - Ollama API调用失败：404 Client Error: Not Found for url: http://localhost:11434/v1/api/generate
+2024-10-21 16:33:52,467 - ERROR - 发生错误：404 Client Error: Not Found for url: http://localhost:11434/v1/api/generate
+Traceback (most recent call last):
+  File "/Volumes/祁昊ssd/编程/AI-markdown/auto-translater.py", line 353, in <module>
+    translate_file(input_file, filename, "zh")
+  File "/Volumes/祁昊ssd/编程/AI-markdown/auto-translater.py", line 263, in translate_file
+    translate_and_append(current_chunk, lang, output_paragraphs)
+  File "/Volumes/祁昊ssd/编程/AI-markdown/auto-translater.py", line 173, in translate_and_append
+    translated_text = translate_text(part['content'].strip(), lang, "main-body")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/祁昊ssd/编程/AI-markdown/auto-translater.py", line 108, in translate_text
+    response.raise_for_status()
+  File "/Volumes/祁昊ssd/编程/AI-markdown/venv/lib/python3.11/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: http://localhost:11434/v1/api/generate

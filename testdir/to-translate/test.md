@@ -1,9 +1,23 @@
-# ComfyUI's ControlNet Auxiliary Preprocessors
+# Nodes (sections are categories in Comfy menu)
 
-Plug-and-play [ComfyUI](https://github.com/comfyanonymous/ComfyUI) node sets for making [ControlNet](https://github.com/lllyasviel/ControlNet/) hint images
+## Line Extractors
 
-"anime style, a protest in the street, cyberpunk city, a woman with pink hair and golden eyes (looking at the viewer) is holding a sign with the text "ComfyUI ControlNet Aux" in bold, neon pink" on Flux.1 Dev
-
-![](./examples/CNAuxBanner.jpg)
+| Preprocessor Node       | sd-webui-controlnet/other                            | ControlNet/T2I-Adapter                                                                                                                                                                                                    |
+| ----------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Binary Lines            | binary                                               | control_scribble                                                                                                                                                                                                          |
+| Canny Edge              | canny                                                | control_v11p_sd15_canny <br> control_canny <br> t2iadapter_canny                                                                                                                                                          |
+| HED Soft-Edge Lines     | hed                                                  | control_v11p_sd15_softedge <br> control_hed                                                                                                                                                                               |
+| Standard Lineart        | standard_lineart                                     | control_v11p_sd15_lineart                                                                                                                                                                                                 |
+| Realistic Lineart       | lineart (or `lineart_coarse` if `coarse` is enabled) | control_v11p_sd15_lineart                                                                                                                                                                                                 |
+| Anime Lineart           | lineart_anime                                        | control_v11p_sd15s2_lineart_anime                                                                                                                                                                                         |
+| Manga Lineart           | lineart_anime_denoise                                | control_v11p_sd15s2_lineart_anime                                                                                                                                                                                         |
+| M-LSD Lines             | mlsd                                                 | control_v11p_sd15_mlsd <br> control_mlsd                                                                                                                                                                                  |
+| PiDiNet Soft-Edge Lines | pidinet                                              | control_v11p_sd15_softedge <br> control_scribble                                                                                                                                                                          |
+| Scribble Lines          | scribble                                             | control_v11p_sd15_scribble <br> control_scribble                                                                                                                                                                          |
+| Scribble XDoG Lines     | scribble_xdog                                        | control_v11p_sd15_scribble <br> control_scribble                                                                                                                                                                          |
+| Fake Scribble Lines     | scribble_hed                                         | control_v11p_sd15_scribble <br> control_scribble                                                                                                                                                                          |
+| TEED Soft-Edge Lines    | teed                                                 | [controlnet-sd-xl-1.0-softedge-dexined](https://huggingface.co/SargeZT/controlnet-sd-xl-1.0-softedge-dexined/blob/main/controlnet-sd-xl-1.0-softedge-dexined.safetensors) <br> control_v11p_sd15_softedge (Theoretically) |
+| Scribble PiDiNet Lines  | scribble_pidinet                                     | control_v11p_sd15_scribble <br> control_scribble                                                                                                                                                                          |
+| AnyLine Lineart         |                                                      | mistoLine_fp16.safetensors <br> mistoLine_rank256 <br> control_v11p_sd15s2_lineart_anime <br> control_v11p_sd15_lineart                                                                                                   |
 
 [translate]
