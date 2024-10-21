@@ -1,26 +1,25 @@
 创建虚拟环境
 venv\Scripts\activate
 
-激活虚拟环境 
+激活虚拟环境
 .\venv\Scripts\python
 
 安装必需的模块
 pip install -r requirements.txt
 
-
 # mac
+
 删除现有的虚拟环境
 rm -rf venv  
 重新创建虚拟环境
 python3 -m venv venv  
 激活虚拟环境
-source venv/bin/activate  
+source venv/bin/activate
 
 安装必需的模块
 pip install -r requirements.txt
 启动脚本
 python auto-translater.py
-
 
 强制重新翻译
 在文档底部添加[translate]，再执行脚本，就会重新翻译

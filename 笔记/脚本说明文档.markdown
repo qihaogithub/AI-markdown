@@ -1,0 +1,121 @@
+# auto-translater.py 脚本说明文档
+
+这个脚本是一个自动翻译工具，主要用于将 Markdown 文件从一种语言翻译成另一种语言（在这个例子中是从英语翻译成中文）。它使用 OpenAI 的 API 来执行翻译任务。
+
+## 主要功能
+
+1. 自动翻译指定目录下的 Markdown 文件
+2. 处理文件的 Front Matter
+3. 支持长文本的分段翻译
+4. 维护已处理文件列表，避免重复翻译
+5. 支持特定文本的固定替换规则
+6. 提供强制重新翻译的选项
+
+## 导入必要的库
+
+```Python
+import os
+import openai
+import sys
+import re
+import yaml
+import env
+```
+
+- os: 用于操作文件和目录
+- openai: OpenAI 的 Python 客户端库，用于调用翻译 API
+- sys: 提供 Python 解释器相关的功能
+- re: 用于正则表达式操作
+- yaml: 用于处理 YAML 格式的数据
+- env: 自定义模块，用于存储环境变量
+
+## 设置 API 参数
+
+```Python
+openai.api_key = os.environ.get("CHATGPT_API_KEY")
+openai.api_base = os.environ.get("CHATGPT_API_BASE")
+```
+
+从环境变量中获取 OpenAI API 的密钥和基础 URL。
+
+## 主要配置项
+
+```Python
+max_length = 1800
+dir_to_translate = "testdir/to-translate"
+dir_translated = {
+    "zh": "testdir/docs/zh"
+}
+exclude_list = ["index.md", "Contact-and-Subscribe.md", "WeChat.md"]
+processed_list = "processed_list.txt"
+tips_translated_by_chatgpt = {
+    "zh": "\n\n> 本文是使用AI翻译的，如有遗漏请[**反馈**]( )。"
+}
+marker_force_translate = "\n[translate]\n"
+```
+
+- max_length: 单次翻译的最大字符数
+- dir_to_translate: 待翻译文件的目录
+- dir_translated: 翻译后文件的存放目录
+- exclude_list: 不需要翻译的文件列表
+- processed_list: 已处理文件的记录列表
+- tips_translated_by_chatgpt: AI 翻译提示信息
+- marker_force_translate: 强制翻译的标记
+
+## Front Matter 处理规则
+
+```Python
+front_matter_translation_rules = {
+    "title": lambda value, lang: translate_text(value, lang, "front-matter"),
+    "description": lambda value, lang: translate_text(value, lang, "front-matter"),
+    "categories": lambda value, lang: front_matter_replace(value, lang),
+    "tags": lambda value, lang: front_matter_replace(value, lang),
+}
+```
+
+定义了如何处理 Markdown 文件的 Front Matter 部分。某些字段会被翻译，而其他字段会使用固定的替换规则。
+
+## 替换规则
+
+脚本定义了两种替换规则：
+
+1. 正文替换规则 (replace_rules)
+2. Front Matter 替换规则 (front_matter_replace_rules)
+
+这些规则用于处理一些固定的文本内容，避免重复翻译或保持特定格式。
+
+## 主要函数
+
+### translate_text(text, lang, type)
+
+使用 OpenAI 的 API 来翻译文本。根据不同的内容类型（Front Matter 或主体内容）使用不同的翻译提示。
+
+### translate_front_matter(front_matter, lang)
+
+处理 Markdown 文件的 Front Matter 部分，根据预定义的规则翻译或替换各个字段。
+
+### split_text(text, max_length)
+
+将长文本拆分成较小的段落，以确保不超过 API 的最大输入长度限制。
+
+### translate_file(input_file, filename, lang)
+
+这是主要的翻译函数，它读取输入文件，处理 Front Matter，翻译主体内容，然后将结果写入输出文件。
+
+## 主程序逻辑
+
+1. 遍历指定目录中的所有 Markdown 文件
+2. 检查文件是否在排除列表或已处理列表中
+3. 如果需要翻译，则调用 translate_file 函数
+4. 更新已处理文件列表
+5. 处理异常并输出错误信息
+
+## 使用注意事项
+
+1. 确保已正确设置 OpenAI API 密钥和基础 URL
+2. 根据需要调整 max_length 参数，以适应 API 的限制
+3. 可以通过修改 exclude_list 来排除不需要翻译的文件
+4. 使用 marker_force_translate 标记可以强制重新翻译已处理的文件
+5. 根据需要调整替换规则，以处理特定的文本内容
+
+这个脚本的设计考虑了多种情况，包括长文本的处理、特定内容的替换、Front Matter 的特殊处理等，使其能够灵活地处理各种 Markdown 文件的翻译需求。

@@ -5,6 +5,7 @@ import sys
 import re
 import yaml  # pip install PyYAML
 import env
+import json
 
 # 设置 OpenAI API Key 和 API Base 参数，通过 env.py 传入
 openai.api_key = os.environ.get("CHATGPT_API_KEY")
@@ -16,7 +17,7 @@ max_length = 1800
 # 设置翻译的路径
 dir_to_translate = "testdir/to-translate"
 dir_translated = {
-    "zh": "testdir/docs/zh"  # 只保留中文路径
+    "zh": "testdir/docs/zh" 
 }
 
 # 不进行翻译的文件列表
@@ -28,9 +29,8 @@ processed_list = "processed_list.txt"
 tips_translated_by_chatgpt = {
     "zh": "\n\n> 本文是使用AI翻译的，如有遗漏请[**反馈**]( )。"
 }
-
-# 文章使用英文撰写的提示，避免本身为英文的文章被重复翻译为英文
-# marker_written_in_en = "\n> This post was originally written in English.\n"
+# 文章使用中文撰写的提示，避免本身为中文的文章被重复翻译
+marker_written_in_zh = "\n> 本文原始语言为中文。\n"
 # 即使在已处理的列表中，仍需要重新翻译的标记
 marker_force_translate = "\n[translate]\n"
 
@@ -47,58 +47,22 @@ front_matter_translation_rules = {
     # 未添加的字段将默认不翻译
 }
 
-# 固定字段替换规则。文章中一些固定的字段，不需要每篇都进行翻译，且翻译结果可能不一致，所以直接替换掉。
-replace_rules = [
-    {
-        # 版权信息手动翻译
-        "orginal_text": "> 原文地址：<https://wiki-power.com/>",
-        "replaced_text": {
-            "zh": "> 原文地址：<https://wiki-power.com/>"  # 保持原文不变
-        }
-    },
-    {
-        # 版权信息手动翻译
-        "orginal_text": "> 本篇文章受 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by/4.0/deed.zh) 协议保护，转载请注明出处。",
-        "replaced_text": {
-            "zh": "> 本篇文章受 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by/4.0/deed.zh) 协议保护，转载请注明出处。"  # 保持原文不变
-        }
-    },
-    {
-        # 文章中的站内链接，跳转为当前相同语言的网页
-        "orginal_text": "](https://wiki-power.com/",
-        "replaced_text": {
-            "zh": "](https://wiki-power.com/zh/"  # 添加中文链接
-        }
-    }
-]
+# 在 load_replace_rules 函数之后添加以下函数定义
 
-# Front Matter 固定字段替换规则。
-front_matter_replace_rules = [
-    {
-        "orginal_text": "类别 1",
-        "replaced_text": {
-            "zh": "类别 1",
-        }
-    },
-    {
-        "orginal_text": "类别 2",
-        "replaced_text": {
-            "zh": "类别 2",
-        }
-    },
-    {
-        "orginal_text": "标签 1",
-        "replaced_text": {
-            "zh": "标签 1",
-        }
-    },
-    {
-        "orginal_text": "标签 2",
-        "replaced_text": {
-            "zh": "标签 2",
-        }
-    },
-]
+def front_matter_replace(value, lang):
+    for rule in front_matter_replace_rules:
+        if value == rule["orginal_text"]:
+            return rule["replaced_text"][lang]
+    return value  # 如果没有匹配的规则，返回原始值
+
+# 在文件开头添加以下代码来读取 JSON 文件
+def load_replace_rules(file_path):
+    with open(file_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    return data['replace_rules'], data['front_matter_replace_rules']
+
+# 替换原有的 replace_rules 和 front_matter_replace_rules 定义
+replace_rules, front_matter_replace_rules = load_replace_rules('replace_rules.json')
 
 # 定义调用 ChatGPT API 翻译的函数
 def translate_text(text, lang, type):
@@ -218,9 +182,22 @@ def translate_file(input_file, filename, lang):
     paragraphs = input_text.split("\n\n")
     output_paragraphs = []
     current_chunk = ""
+    
+    # 可以被注释的代码段开始
+    # # 创建用于保存分段情况的目录
+    # segment_dir = "testdir/segment"
+    # if not os.path.exists(segment_dir):
+    #     os.makedirs(segment_dir)
+    # segment_file = os.path.join(segment_dir, f"{filename}_segmented.md")
+    # segmented_content = ""
+    # 可以被注释的代码段结束
 
     def translate_and_append(chunk):
         if chunk:
+            # 可以被注释的代码段开始
+            # nonlocal segmented_content
+            # segmented_content += chunk + "\n\n--- 分段标记 ---\n\n"
+            # 可以被注释的代码段结束
             translated_chunk = translate_text(chunk.strip(), lang, "main-body")
             output_paragraphs.append(translated_chunk)
 
@@ -284,6 +261,13 @@ def translate_file(input_file, filename, lang):
     # 最后，将占位词替换为对应的替换文本
     for placeholder, replacement in placeholder_dict.items():
         output_text = output_text.replace(placeholder, replacement)
+
+    # 可以被注释的代码段开始
+    # # 保存分段情况到文件
+    # with open(segment_file, "w", encoding="utf-8") as f:
+    #     f.write(segmented_content)
+    # print(f"分段情况已保存到：{segment_file}")
+    # 可以被注释的代码段结束
 
     # 写入输出文件
     with open(output_file, "w", encoding="utf-8") as f:

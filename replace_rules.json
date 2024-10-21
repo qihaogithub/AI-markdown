@@ -1,0 +1,55 @@
+{
+  "replace_rules": [
+    {
+      "orginal_text": "ControlNet",
+      "replaced_text": {
+        "zh": "ControlNet"
+      }
+    },
+    {
+      "orginal_text": "clip",
+      "replaced_text": {
+        "zh": "clip"
+      }
+    },
+    {
+      "orginal_text": "VAE",
+      "replaced_text": {
+        "zh": "VAE"
+      }
+    },
+    {
+      "orginal_text": "```",
+      "replaced_text": {
+        "zh": "```"
+      }
+    }
+  ],
+
+  "front_matter_replace_rules": [
+    {
+      "orginal_text": "类别 1",
+      "replaced_text": {
+        "zh": "类别 1"
+      }
+    },
+    {
+      "orginal_text": "类别 2",
+      "replaced_text": {
+        "zh": "类别 2"
+      }
+    },
+    {
+      "orginal_text": "标签 1",
+      "replaced_text": {
+        "zh": "标签 1"
+      }
+    },
+    {
+      "orginal_text": "标签 2",
+      "replaced_text": {
+        "zh": "标签 2"
+      }
+    }
+  ]
+}
