@@ -1,0 +1,24 @@
+### 节点（Comfort菜单中的部分相当于分类）
+
+#### 提取器
+
+| 预处理器节点       | sd-webui-controlnet/other                            | ControlNet/T2I-Adapter                                                                                                                                                                                                    |
+| ------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 二进制线条          | binary                                               | control_scribble                                                                                                                                                                                                          |
+| Canny 边缘          | canny                                                | control_v11p_sd15_canny <br> control_canny <br> t2iadapter_canny                                                                                                                                                          |
+| 软边缘标准线稿      | standard_lineart                                     | control_v11p_sd15_lineart                                                                                                                                                                                                 |
+| 真实线稿          | lineart (或 `lineart_coarse` 如果启用了 `coarse`) | control_v11p_sd15_lineart                                                                                                                                                                                                 |
+| 动漫线稿          | lineart_anime                                        | control_v11p_sd15s2_lineart_anime                                                                                                                                                                                         |
+| 漫画线稿          | lineart_anime_denoise                                | control_v11p_sd15s2_lineart_anime                                                                                                                                                                                         |
+| MLSD 线稿          | mlsd                                                 | control_v11p_sd15_mlsd <br> control_mlsd                                                                                                                                                                                  |
+| PiDiNet 软边缘线稿  | pidinet                                              | control_v11p_sd15_softedge <br> control_scribble                                                                                                                                                                          |
+| 刷子线条          | scribble                                             | control_v11p_sd15_screbble <br> control_scribble                                                                                                                                                                          |
+| 刷子 XDoG 线稿      | scribble_xdog                                        | control_v11p_sd15_screbble <br> control_scribble                                                                                                                                                                          |
+| 虚拟刷子线稿      | scribble_hed                                         | control_v11p_sd15_screbble <br> control_scribble                                                                                                                                                                          |
+| TEED 软边缘线稿    | teed                                                 | [controlnet-sd-xl-1.0-softedge-dexined](https://huggingface.co/SargeZT/controlnet-sd-xl-1.0-softedge-dexined/blob/main/controlnet-sd-xl-1.0-softedge-dexined.safetensors) <br> control_v11p_sd15_softedge (理论上) |
+| 刷子 PiDiNet 线稿    | scribble_pidinet                                     | control_v11p_sd15_screbble <br> control_scribble                                                                                                                                                                          |
+| 任意线稿线稿      |                                                      | mistoLine_fp16.safetensors <br> mistoLine_rank256 <br> control_v11p_sd15s2_lineart_anime <br> control_v11p_sd15_lineart                                                                                                   |
+
+# 节点（Comfort菜单中的部分相当于类别）
+
+## 提取线
